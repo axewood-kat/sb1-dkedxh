@@ -3,10 +3,10 @@ import { Heart, Loader2 } from 'lucide-react';
 import { getStripe } from '../lib/stripe';
 
 const DONATION_AMOUNTS = [
+  { value: 300, label: '$3' },
   { value: 500, label: '$5' },
   { value: 1000, label: '$10' },
-  { value: 2000, label: '$20' },
-  { value: 5000, label: '$50' }
+  { value: 2000, label: '$20' }
 ] as const;
 
 interface DonateButtonProps {
@@ -15,7 +15,7 @@ interface DonateButtonProps {
 
 export default function DonateButton({ show }: DonateButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedAmount, setSelectedAmount] = useState(1000);
+  const [selectedAmount, setSelectedAmount] = useState(500);
   const [error, setError] = useState<string | null>(null);
 
   if (!show) return null;
