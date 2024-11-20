@@ -15,6 +15,6 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    exclude: ['@upstash/redis', 'stripe', 'openai']
+    exclude: ['stripe', '@upstash/redis', 'openai']
   }
 });

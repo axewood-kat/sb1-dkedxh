@@ -25,40 +25,7 @@ const RATE_LIMIT = 10;
 const COST_PER_REQUEST = 0.03;
 const MONTHLY_BUDGET = 50;
 
-const SYSTEM_PROMPT = `You are a payslip analysis assistant. Extract the following information from the payslip image and format it exactly as shown in the example:
-{
-  "payPeriod": {
-    "startDate": "YYYY-MM-DD",
-    "endDate": "YYYY-MM-DD"
-  },
-  "workedTime": {
-    "workedTime": { "hours": "", "rate": "", "total": "" },
-    "overtime": { "hours": "", "rate": "", "total": "" },
-    "other": { "hours": "", "rate": "", "total": "" }
-  },
-  "bapsLeave": {
-    "sickLeave": { "time": "", "rate": "", "unit": "hours", "total": "" },
-    "publicHolidays": { "time": "", "rate": "", "unit": "hours", "total": "" },
-    "other": { "time": "", "rate": "", "unit": "hours", "total": "" }
-  },
-  "holidayPay": {
-    "annualLeave": { "time": "", "rate": "", "unit": "hours", "total": "" },
-    "other": { "time": "", "rate": "", "unit": "hours", "total": "" }
-  },
-  "ytdEarnings": {
-    "total": ""
-  },
-  "employmentConditions": {
-    "hoursPerDay": "8",
-    "daysPerWeek": "5",
-    "startDate": "",
-    "ordinaryPay": {
-      "amount": "",
-      "type": "hourly",
-      "allowBelowMinimum": false
-    }
-  }
-}`;
+const SYSTEM_PROMPT = `Analyze the payslip image and extract the information in JSON format.`;
 
 async function checkRateLimit(ip: string): Promise<boolean> {
   const key = `ratelimit:${ip}`;
@@ -137,16 +104,10 @@ export const handler: Handler = async (event) => {
         {
           role: 'user',
           content: [
-            {
-              type: 'text',
-              text: 'Please analyze this payslip and extract the information in the specified JSON format.'
-            },
-            {
+            { type: 'text', text: 'Extract payslip information.' },
+            { 
               type: 'image_url',
-              image_url: {
-                url: image,
-                detail: 'high'
-              }
+              image_url: { url: image }
             }
           ]
         }
