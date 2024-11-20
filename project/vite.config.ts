@@ -13,5 +13,8 @@ export default defineConfig({
     rollupOptions: {
       external: ['stripe', '@upstash/redis', 'openai']
     }
+  },
+  optimizeDeps: {
+    exclude: ['@upstash/redis', 'stripe', 'openai']
   }
 });

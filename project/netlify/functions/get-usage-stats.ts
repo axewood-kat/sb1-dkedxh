@@ -24,7 +24,6 @@ export const handler: Handler = async (event) => {
     
     const dailyStats = await redis.hgetall(usageKey);
     
-    // Get monthly stats
     const month = new Date().toISOString().slice(0, 7);
     const monthlyUsageKey = `usage:${month}:cost`;
     const monthlyCost = await redis.get(monthlyUsageKey) || 0;
@@ -36,7 +35,7 @@ export const handler: Handler = async (event) => {
           total: Number(dailyStats?.total || 0),
           success: Number(dailyStats?.success || 0),
           failed: Number(dailyStats?.failed || 0),
-          cost: Number(dailyStats?.cost || 0) / 100, // Convert cents to dollars
+          cost: Number(dailyStats?.cost || 0) / 100,
         },
         monthly: {
           cost: Number(monthlyCost) / 100,
