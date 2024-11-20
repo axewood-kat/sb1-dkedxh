@@ -7,5 +7,11 @@ export default defineConfig({
     port: 5173,
     host: true,
     open: true
+  },
+  build: {
+    outDir: 'dist',
+    rollupOptions: {
+      external: ['stripe', '@upstash/redis', 'openai']
+    }
   }
 });

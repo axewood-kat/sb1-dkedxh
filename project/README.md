@@ -1,60 +1,62 @@
 # NZ Leave Calculator
 
-A web-based calculator for verifying New Zealand leave entitlements and payments.
+A web application for calculating and verifying New Zealand leave entitlements and payments.
 
-## Features
+## Deployment Instructions
 
-- Calculate holiday pay rates (OWP vs AWE)
-- Verify BAPS leave payments
-- Check against minimum wage requirements
-- Support for various pay periods and work patterns
+1. Fork or clone this repository
+2. Set up environment variables in Netlify:
+   - `OPENAI_API_KEY`: Your OpenAI API key
+   - `STRIPE_SECRET_KEY`: Your Stripe secret key
+   - `UPSTASH_REDIS_REST_URL`: Your Upstash Redis REST URL
+   - `UPSTASH_REDIS_REST_TOKEN`: Your Upstash Redis REST token
 
-## Getting Started
+3. Connect your GitHub repository to Netlify:
+   - Go to Netlify dashboard
+   - Click "Add new site" > "Import an existing project"
+   - Choose your GitHub repository
+   - Use these build settings:
+     - Build command: `npm run build:all`
+     - Publish directory: `dist`
+     - Functions directory: `dist/functions`
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start development server:
-   ```bash
-   npm run dev
-   ```
+4. Deploy:
+   - Netlify will automatically deploy when you push to the main branch
+   - You can also trigger manual deploys from the Netlify dashboard
 
-## Testing
+## Development
 
-Run the test suite:
 ```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build:all
+
+# Run tests
 npm test
 ```
 
-Generate coverage report:
-```bash
-npm run coverage
+## Environment Variables
+
+Create a `.env` file in the root directory with these variables:
+
+```env
+# Stripe Configuration
+VITE_STRIPE_PUBLIC_KEY=your_stripe_public_key
+STRIPE_SECRET_KEY=your_stripe_secret_key
+
+# OpenAI Configuration
+OPENAI_API_KEY=your_openai_api_key
+
+# Redis Configuration
+UPSTASH_REDIS_REST_URL=your_upstash_redis_url
+UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Make your changes
-4. Run tests
-5. Submit a pull request
 
 ## License
 
 MIT License - see LICENSE file for details
-
-## Legal Disclaimer
-
-This calculator is provided for informational purposes only. While we strive for accuracy, you should consult with your employer or legal professional for official guidance on leave entitlements and payments.
-
-## Security
-
-- Found a security issue? Please email security@example.com
-- See our security.txt for more information
-- We follow responsible disclosure practices
-
-## Support
-
-For support or questions, please open an issue on GitHub.

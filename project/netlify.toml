@@ -1,12 +1,11 @@
 [build]
   command = "npm run build:all"
   publish = "dist"
-  functions = "netlify/functions"
+  functions = "dist/functions"
 
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["@upstash/redis", "stripe", "openai"]
-  included_files = ["package.json"]
 
 [[redirects]]
   from = "/*"
