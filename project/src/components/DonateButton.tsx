@@ -9,7 +9,7 @@ export default function DonateButton({ show }: DonateButtonProps) {
   if (!show) return null;
 
   const handleDonation = () => {
-    alert('Donation feature coming soon! Thank you for your interest in supporting us.');
+    alert('Thank you for your interest in supporting us! Donation feature coming soon.');
   };
 
   return (
@@ -26,7 +26,7 @@ export default function DonateButton({ show }: DonateButtonProps) {
                    transition-colors flex items-center justify-center gap-2"
         >
           <Heart className="h-4 w-4" />
-          <span>Donate $5</span>
+          <span>Donate</span>
         </button>
       </div>
     </div>

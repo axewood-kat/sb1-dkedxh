@@ -4,49 +4,58 @@ A web application for calculating and verifying New Zealand leave entitlements a
 
 ## Manual Deployment Instructions
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd nz-leave-calculator
-```
+1. **Prerequisites**
+   - Node.js 18 or higher
+   - npm 9 or higher
+   - Git (optional)
 
-2. Install dependencies:
-```bash
-npm install
-```
+2. **Environment Setup**
+   Create a `.env` file in the root directory with the following variables:
+   ```env
+   OPENAI_API_KEY=your_openai_api_key
+   UPSTASH_REDIS_REST_URL=your_upstash_redis_url
+   UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
+   ```
 
-3. Create environment variables:
-Create a `.env` file in the root directory with the following variables:
-```env
-VITE_STRIPE_PUBLIC_KEY=your_stripe_public_key
-STRIPE_SECRET_KEY=your_stripe_secret_key
-OPENAI_API_KEY=your_openai_api_key
-UPSTASH_REDIS_REST_URL=your_upstash_redis_url
-UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
-```
+3. **Installation**
+   ```bash
+   # Install dependencies
+   npm install
+   ```
 
-4. Build the project:
-```bash
-npm run build:all
-```
+4. **Build**
+   ```bash
+   # Build the application and serverless functions
+   npm run build:all
+   ```
 
-5. Deploy to Netlify:
-   - Install Netlify CLI: `npm install -g netlify-cli`
-   - Login to Netlify: `netlify login`
-   - Initialize site: `netlify init`
-   - Deploy: `netlify deploy --prod`
+5. **Deploy to Netlify**
+   
+   Option 1: Using Netlify CLI
+   ```bash
+   # Install Netlify CLI globally
+   npm install -g netlify-cli
 
-   Or deploy manually through Netlify UI:
+   # Login to Netlify
+   netlify login
+
+   # Initialize site (first time only)
+   netlify init
+
+   # Deploy
+   netlify deploy --prod
+   ```
+
+   Option 2: Manual Upload
    - Go to [Netlify](https://app.netlify.com)
    - Drag and drop the `dist` folder
    - Configure environment variables in site settings
 
-## Environment Variables Setup in Netlify
+## Environment Variables Setup
 
 Add these environment variables in Netlify (Site settings > Environment variables):
 
 - `OPENAI_API_KEY`: Your OpenAI API key
-- `STRIPE_SECRET_KEY`: Your Stripe secret key
 - `UPSTASH_REDIS_REST_URL`: Your Upstash Redis REST URL
 - `UPSTASH_REDIS_REST_TOKEN`: Your Upstash Redis REST token
 
@@ -59,13 +68,11 @@ If deploying through Netlify UI, use these build settings:
 
 ## Development
 
-Start the development server:
 ```bash
+# Start development server
 npm run dev
-```
 
-Run tests:
-```bash
+# Run tests
 npm test
 ```
 

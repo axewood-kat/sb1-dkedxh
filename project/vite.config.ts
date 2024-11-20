@@ -11,10 +11,10 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     rollupOptions: {
-      external: ['stripe', '@upstash/redis', 'openai']
+      external: ['@upstash/redis', 'openai', '@netlify/functions']
     }
   },
   optimizeDeps: {
-    exclude: ['stripe', '@upstash/redis', 'openai']
+    exclude: ['@upstash/redis', 'openai', '@netlify/functions']
   }
 });
