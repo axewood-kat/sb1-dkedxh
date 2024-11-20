@@ -6,6 +6,7 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["@upstash/redis", "stripe", "openai"]
+  included_files = ["package.json"]
 
 [[redirects]]
   from = "/*"
