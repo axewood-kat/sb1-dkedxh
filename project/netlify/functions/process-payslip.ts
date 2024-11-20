@@ -78,7 +78,7 @@ async function trackUsage(ip: string, success: boolean): Promise<void> {
   await redis.hincrby(usageKey, 'total', 1);
   await redis.hincrby(usageKey, success ? 'success' : 'failed', 1);
   await redis.hincrby(usageKey, 'cost', Math.floor(COST_PER_REQUEST * 100));
-  await redis.expire(usageKey, 7776000); // 90 days
+  await redis.expire(usageKey, 7776000);
 }
 
 async function checkBudget(): Promise<boolean> {
@@ -87,33 +87,6 @@ async function checkBudget(): Promise<boolean> {
   const monthlyUsage = await redis.get(monthlyUsageKey) || 0;
   
   return Number(monthlyUsage) < MONTHLY_BUDGET * 100;
-}
-
-function validatePayslipData(data: any): boolean {
-  try {
-    if (!data || typeof data !== 'object') {
-      console.log('Data validation failed: not an object');
-      return false;
-    }
-
-    const requiredProps = ['payPeriod', 'workedTime', 'bapsLeave', 'holidayPay', 'ytdEarnings', 'employmentConditions'];
-    for (const prop of requiredProps) {
-      if (!(prop in data)) {
-        console.log(`Data validation failed: missing ${prop}`);
-        return false;
-      }
-    }
-
-    if (!data.payPeriod?.startDate || !data.payPeriod?.endDate) {
-      console.log('Data validation failed: invalid payPeriod');
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Data validation error:', error);
-    return false;
-  }
 }
 
 export const handler: Handler = async (event) => {
@@ -130,7 +103,6 @@ export const handler: Handler = async (event) => {
   const ip = event.headers['x-forwarded-for'] || 'unknown';
 
   try {
-    console.log('Checking rate limit...');
     const withinLimit = await checkRateLimit(ip);
     if (!withinLimit) {
       return {
@@ -140,7 +112,6 @@ export const handler: Handler = async (event) => {
       };
     }
 
-    console.log('Checking budget...');
     const withinBudget = await checkBudget();
     if (!withinBudget) {
       return {
@@ -150,30 +121,8 @@ export const handler: Handler = async (event) => {
       };
     }
 
-    if (!event.body) {
-      console.log('No request body provided');
-      return {
-        statusCode: 400,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'Request body is required' }),
-      };
-    }
-
-    let requestBody;
-    try {
-      requestBody = JSON.parse(event.body);
-    } catch (error) {
-      console.error('Failed to parse request body:', error);
-      return {
-        statusCode: 400,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'Invalid JSON in request body' }),
-      };
-    }
-
-    const { image } = requestBody;
+    const { image } = JSON.parse(event.body || '{}');
     if (!image) {
-      console.log('No image data provided');
       return {
         statusCode: 400,
         headers: { 'Content-Type': 'application/json' },
@@ -181,7 +130,6 @@ export const handler: Handler = async (event) => {
       };
     }
 
-    console.log('Calling OpenAI API...');
     const response = await openai.chat.completions.create({
       model: 'gpt-4-vision-preview',
       messages: [
@@ -207,11 +155,9 @@ export const handler: Handler = async (event) => {
       temperature: 0.1,
     });
 
-    console.log('OpenAI API response received');
     const result = response.choices[0]?.message?.content;
     
     if (!result) {
-      console.error('No content in OpenAI response');
       await trackUsage(ip, false);
       return {
         statusCode: 500,
@@ -220,48 +166,27 @@ export const handler: Handler = async (event) => {
       };
     }
 
-    console.log('Parsing OpenAI response...');
-    let parsedResult;
     try {
-      parsedResult = JSON.parse(result.trim());
+      const parsedResult = JSON.parse(result.trim());
+      await trackUsage(ip, true);
+      
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(parsedResult),
+      };
     } catch (error) {
       console.error('Failed to parse OpenAI response:', error);
-      console.log('Raw response:', result);
       await trackUsage(ip, false);
       return {
         statusCode: 422,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           error: 'Failed to parse AI response',
-          details: error instanceof Error ? error.message : 'Unknown error',
-          raw: result
+          details: error instanceof Error ? error.message : 'Unknown error'
         }),
       };
     }
-
-    console.log('Validating parsed data...');
-    if (!validatePayslipData(parsedResult)) {
-      console.error('Invalid data structure in response');
-      await trackUsage(ip, false);
-      return {
-        statusCode: 422,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          error: 'Invalid data structure in AI response',
-          raw: parsedResult
-        }),
-      };
-    }
-
-    console.log('Processing successful');
-    await trackUsage(ip, true);
-    
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(parsedResult),
-    };
-
   } catch (error) {
     console.error('Function error:', error);
     await trackUsage(ip, false);
