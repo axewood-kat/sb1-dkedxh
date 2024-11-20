@@ -14,7 +14,7 @@
 
 [build.environment]
   NODE_VERSION = "18"
-  NPM_FLAGS = "--no-audit --no-fund"
+  NPM_FLAGS = "--no-audit --no-fund --production=false"
 
 [dev]
   command = "npm run dev"
