@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [react()],
@@ -10,11 +11,21 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    target: 'esnext',
     rollupOptions: {
-      external: ['@upstash/redis', 'openai', '@netlify/functions']
+      output: {
+        manualChunks: {
+          'pdf': ['pdfjs-dist']
+        }
+      }
     }
   },
   optimizeDeps: {
-    exclude: ['@upstash/redis', 'openai', '@netlify/functions']
+    include: ['pdfjs-dist']
+  },
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src')
+    }
   }
 });

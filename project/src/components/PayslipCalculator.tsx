@@ -9,7 +9,7 @@ import YTDSection from './YTDSection';
 import EmploymentConditionsSection from './EmploymentConditionsSection';
 import ResultsDisplay from './ResultsDisplay';
 import DonateButton from './DonateButton';
-import PayslipUploader from './PayslipUploader';
+import PDFUploader from './PDFUploader';
 import { validateForm } from '../utils/validations';
 import { calculateWorkedTimeRate } from '../utils/calculations';
 
@@ -65,12 +65,16 @@ export default function PayslipCalculator() {
   };
 
   const handlePayslipProcessed = (data: PayslipData) => {
+    setErrors({});
     setPayslipData(data);
+    console.log('Payslip data received:', data);
     setUploadError(null);
   };
 
   const handleUploadError = (error: string) => {
+    setErrors({});
     setUploadError(error);
+    console.error('Upload error:', error);
   };
 
   const calculateWorkedTimeRateFromData = (): number => {
@@ -146,8 +150,8 @@ export default function PayslipCalculator() {
               <p className="text-emerald-700 mb-4">
                 Save time by uploading your payslip - we'll automatically extract the key information for you.
               </p>
-              <PayslipUploader 
-                onPayslipProcessed={handlePayslipProcessed}
+              <PDFUploader 
+                onPayslipParsed={handlePayslipProcessed}
                 onError={handleUploadError}
               />
               {uploadError && (

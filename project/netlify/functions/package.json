@@ -1,0 +1,10 @@
+{
+  "name": "netlify-functions",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "@netlify/functions": "^2.6.0",
+    "@upstash/redis": "^1.28.4",
+    "openai": "^4.28.4"
+  }
+}

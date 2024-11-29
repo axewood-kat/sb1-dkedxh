@@ -12,33 +12,20 @@ export async function processPayslipImage(imageData: string): Promise<PayslipDat
       body: JSON.stringify({ image: imageData }),
     });
 
-    console.log('Response status:', response.status);
-    const contentType = response.headers.get('Content-Type');
-    console.log('Response content type:', contentType);
-
-    const text = await response.text();
-    console.log('Response text length:', text.length);
-    console.log('First 100 chars of response:', text.substring(0, 100));
-
-    if (!text) {
-      throw new Error('Empty response from server');
-    }
-
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch (parseError) {
-      console.error('JSON parse error:', parseError);
-      console.log('Full response text:', text);
-      throw new Error('Invalid JSON response from server');
-    }
-
     if (!response.ok) {
-      const errorMessage = data.error || data.details || 'Failed to process payslip';
-      console.error('Server error:', data);
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error || errorData.details || `Server error: ${response.status}`;
+      console.error('Server error:', errorData);
       throw new Error(errorMessage);
     }
 
+    const contentType = response.headers.get('Content-Type');
+    if (!contentType?.includes('application/json')) {
+      console.error('Unexpected content type:', contentType);
+      throw new Error('Invalid response format from server');
+    }
+
+    const data = await response.json();
     if (!isValidPayslipData(data)) {
       console.error('Invalid data structure:', data);
       throw new Error('Invalid payslip data structure received');

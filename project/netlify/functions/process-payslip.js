@@ -1,4 +1,4 @@
-const { Handler } = require('@netlify/functions');
+// @ts-check
 const OpenAI = require('openai');
 const { Redis } = require('@upstash/redis');
 
@@ -19,9 +19,9 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
-const RATE_LIMIT = 10; // requests per day per IP
-const COST_PER_REQUEST = 0.03; // estimated cost in USD
-const MONTHLY_BUDGET = 50; // maximum monthly spending in USD
+const RATE_LIMIT = 10;
+const COST_PER_REQUEST = 0.03;
+const MONTHLY_BUDGET = 50;
 
 const SYSTEM_PROMPT = `
 You are a payslip analysis expert. Analyze the payslip image and extract the following information in JSON format:
@@ -90,7 +90,10 @@ async function checkBudget() {
   return Number(monthlyUsage) < MONTHLY_BUDGET * 100;
 }
 
-exports.handler = async (event) => {
+/**
+ * @type {import('@netlify/functions').Handler}
+ */
+const handler = async (event) => {
   console.log('Function invoked with method:', event.httpMethod);
   
   if (event.httpMethod !== 'POST') {
@@ -212,3 +215,5 @@ exports.handler = async (event) => {
     };
   }
 };
+
+module.exports = { handler };

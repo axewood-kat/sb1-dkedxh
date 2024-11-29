@@ -1,23 +1,31 @@
 import ReactGA from 'react-ga4';
 
-// Initialize GA4 with your measurement ID
+const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX';
+
+// Initialize GA4 with measurement ID
 export const initGA = () => {
-  ReactGA.initialize('G-XXXXXXXXXX'); // Replace with your GA4 measurement ID
+  if (process.env.NODE_ENV === 'production') {
+    ReactGA.initialize(GA_MEASUREMENT_ID);
+  }
 };
 
 // Track page views
 export const trackPageView = (path: string) => {
-  ReactGA.send({ hitType: 'pageview', page: path });
+  if (process.env.NODE_ENV === 'production') {
+    ReactGA.send({ hitType: 'pageview', page: path });
+  }
 };
 
 // Track events
 export const trackEvent = (category: string, action: string, label?: string, value?: number) => {
-  ReactGA.event({
-    category,
-    action,
-    label,
-    value,
-  });
+  if (process.env.NODE_ENV === 'production') {
+    ReactGA.event({
+      category,
+      action,
+      label,
+      value,
+    });
+  }
 };
 
 // Track calculation attempts

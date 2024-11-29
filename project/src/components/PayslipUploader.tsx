@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { FileUp, Loader2, AlertTriangle } from 'lucide-react';
-import { processPayslipImage } from '../utils/payslipProcessor';
+import { parsePayslip } from '../utils/payslipParser';
 import type { PayslipData } from '../types';
 
 interface PayslipUploaderProps {
@@ -10,35 +10,30 @@ interface PayslipUploaderProps {
 }
 
 export default function PayslipUploader({ onPayslipProcessed, onError }: PayslipUploaderProps) {
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessing, setIsProcessing] = React.useState(false);
+  const [uploadError, setUploadError] = React.useState<string | null>(null);
 
   const processFile = async (file: File) => {
     setIsProcessing(true);
+    setUploadError(null);
+
     try {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        throw new Error('File size exceeds 10MB limit');
+      // Validate file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error('File size exceeds 10MB limit. Please upload a smaller file.');
       }
 
-      const reader = new FileReader();
-      
-      const readerPromise = new Promise((resolve, reject) => {
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(new Error('Failed to read file'));
-      });
-
-      reader.readAsDataURL(file);
-      
-      const base64Data = await readerPromise;
-      
-      if (typeof base64Data !== 'string') {
-        throw new Error('Invalid file data');
+      // Validate file type
+      if (file.type !== 'application/pdf') {
+        throw new Error('Invalid file type. Please upload a PDF file.');
       }
 
-      const data = await processPayslipImage(base64Data);
+      const data = await parsePayslip(file);
       onPayslipProcessed(data);
     } catch (error) {
-      console.error('Upload error:', error);
-      onError(error instanceof Error ? error.message : 'Failed to process payslip');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process payslip';
+      setUploadError(errorMessage);
+      onError(errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -53,12 +48,11 @@ export default function PayslipUploader({ onPayslipProcessed, onError }: Payslip
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'application/pdf': ['.pdf'],
-      'image/*': ['.png', '.jpg', '.jpeg'],
+      'application/pdf': ['.pdf']
     },
     maxFiles: 1,
     disabled: isProcessing,
-    maxSize: 10 * 1024 * 1024, // 10MB
+    maxSize: 10 * 1024 * 1024
   });
 
   return (
@@ -77,7 +71,19 @@ export default function PayslipUploader({ onPayslipProcessed, onError }: Payslip
           {isProcessing ? (
             <>
               <Loader2 className="h-8 w-8 text-emerald-500 animate-spin" />
-              <p className="text-sm text-gray-600">Processing payslip...</p>
+              <div className="text-sm text-gray-600">
+                <p>Processing payslip...</p>
+                <p className="text-xs text-gray-500 mt-1">This may take a few moments...</p>
+              </div>
+            </>
+          ) : uploadError ? (
+            <>
+              <AlertTriangle className="h-8 w-8 text-amber-500" />
+              <div className="text-sm text-gray-600">
+                <p className="font-medium text-amber-600 mb-1">Upload Failed</p>
+                <div className="whitespace-pre-line">{uploadError}</div>
+                <p className="mt-2">Click or drag a new file to try again</p>
+              </div>
             </>
           ) : (
             <>
@@ -86,21 +92,11 @@ export default function PayslipUploader({ onPayslipProcessed, onError }: Payslip
                 <p className="font-medium text-gray-800 mb-1">Upload Payslip</p>
                 <p>Drag and drop your payslip here, or click to select file</p>
                 <p className="mt-2 text-xs text-gray-500">
-                  Supported formats: PDF, PNG, JPEG (max 10MB)
+                  Supported format: PDF (max 10MB)
                 </p>
               </div>
             </>
           )}
-        </div>
-      </div>
-
-      <div className="mt-4 text-sm text-gray-600">
-        <div className="flex items-start gap-2">
-          <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5" />
-          <p>
-            Your payslip data is processed securely and never stored. 
-            For best results, ensure the payslip image is clear and all text is readable.
-          </p>
         </div>
       </div>
     </div>

@@ -1,14 +1,15 @@
 import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { FileUp, Loader2 } from 'lucide-react';
-import { parsePDFPayslip } from '../utils/pdfParser';
-import type { PayPeriod } from '../types';
+import { parsePayslip } from '../utils/pdfParser';
+import type { PayslipData } from '../types';
 
 interface PDFUploaderProps {
-  onPayslipParsed: (payslip: PayPeriod) => void;
+  onPayslipParsed: (payslip: PayslipData) => void;
+  onError: (error: string) => void;
 }
 
-export default function PDFUploader({ onPayslipParsed }: PDFUploaderProps) {
+export default function PDFUploader({ onPayslipParsed, onError }: PDFUploaderProps) {
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -20,22 +21,25 @@ export default function PDFUploader({ onPayslipParsed }: PDFUploaderProps) {
     setError(null);
 
     try {
-      const payslipData = await parsePDFPayslip(file);
+      const payslipData = await parsePayslip(file);
       onPayslipParsed(payslipData);
     } catch (err) {
-      setError('Could not parse the payslip. Please check the file format or enter details manually.');
-      console.error('PDF parsing error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to process PDF file';
+      setError(errorMessage);
+      onError(errorMessage);
+      console.error('PDF processing error:', err);
     } finally {
       setIsProcessing(false);
     }
-  }, [onPayslipParsed]);
+  }, [onPayslipParsed, onError]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'application/pdf': ['.pdf'],
+      'application/pdf': ['.pdf']
     },
     maxFiles: 1,
+    disabled: isProcessing
   });
 
   return (
@@ -46,6 +50,7 @@ export default function PDFUploader({ onPayslipParsed }: PDFUploaderProps) {
           border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
           transition-colors duration-200
           ${isDragActive ? 'border-emerald-500 bg-emerald-50' : 'border-gray-300 hover:border-emerald-400'}
+          ${isProcessing ? 'cursor-not-allowed opacity-75' : ''}
         `}
       >
         <input {...getInputProps()} />
